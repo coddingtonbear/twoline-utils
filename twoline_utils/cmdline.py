@@ -40,7 +40,7 @@ def run_from_cmdline():
     parser.add_argument(
         '--loglevel',
         dest='loglevel',
-        default='INFO',
+        default='WARN',
     )
     parser.add_argument(
         '--no-fork',
@@ -48,6 +48,12 @@ def run_from_cmdline():
         default=True,
         action='store_false',
         help='Do not fork command actions into a separate process'
+    )
+    parser.add_argument(
+        '--device-url',
+        dest='device_url',
+        default='http://127.0.0.1:6224/',
+        help='Device URL'
     )
 
     args, remainder = parser.parse_known_args()
@@ -67,7 +73,7 @@ def run_from_cmdline():
         args.command[0],
         remainder
     )
-    command['function'](remainder)
+    command['function'](remainder, settings=args)
     logger.debug(
         'Execution of command %s complete',
         args.command[0],
