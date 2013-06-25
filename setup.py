@@ -12,7 +12,7 @@ with open(
     required = f.read().splitlines()
 
 setup(
-    name='twoline',
+    name='twoline-utils',
     version='0.7.7',
     url='http://bitbucket.org/latestrevision/twoline-utils/',
     description='Utils for http://bitbucket.org/latestrevision/twoline/',
