@@ -13,7 +13,7 @@ with open(
 
 setup(
     name='twoline-utils',
-    version='0.7.7',
+    version='0.1',
     url='http://bitbucket.org/latestrevision/twoline-utils/',
     description='Utils for http://bitbucket.org/latestrevision/twoline/',
     author='Adam Coddington',
