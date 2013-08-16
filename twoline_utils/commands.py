@@ -7,6 +7,9 @@ import requests
 import sys
 import time
 
+from twoline_utils.argtypes import color_tuple
+from twoline_utils.utils import send_flash_message
+
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +40,53 @@ def command(desc, name=None, aliases=None):
 
 def get_command(name):
     return COMMANDS[name]
+
+
+@command('Start a timer and flash the screen when the timer has expired')
+def timer(args, settings, **kwargs):
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        'interval',
+        type=float,
+        nargs=1,
+        help='Amount of time to wait',
+    )
+    parser.add_argument(
+        'message',
+        type=str,
+        nargs='?',
+        default='Timer Expired',
+        help='Jenkins URL to watch'
+    )
+    parser.add_argument(
+        '--color',
+        dest='colors',
+        action='append',
+        type=color_tuple,
+        default=[]
+    )
+    parser.add_argument(
+        '--timeout',
+        dest='timeout',
+        type=int,
+        default=20,
+        help='How long to display this message on the screen',
+    )
+    options = parser.parse_args(args)
+
+    if not options.colors:
+        options.colors.append((255, 0, 0))
+
+    time.sleep(options.interval[0])
+
+    send_flash_message(
+        settings.device_url,
+        {
+            'message': options.message,
+            'blink': options.colors,
+            'timeout': options.timeout,
+        }
+    )
 
 
 @command('Watch a jenkins job at a provided URL', aliases=['wjj', 'jenkins'])
@@ -100,15 +150,6 @@ def watch_jenkins_job(args, settings, **kwargs):
         parsed = urlparse(url)
         return parsed.scheme + '://' + parsed.netloc
 
-    def send_flash_message(message):
-        requests.put(
-            os.path.join(
-                settings.device_url,
-                'flash/'
-            ),
-            data=json.dumps(message)
-        )
-
     job_name, build_no = get_job_name_and_build_number(options.url[0])
     jenkins_url = get_jenkins_base_url(options.url[0])
     formal_build_url = get_formal_build_url(
@@ -129,28 +170,34 @@ def watch_jenkins_job(args, settings, **kwargs):
         while True:
             if not build.is_running():
                 if build.is_good():
-                    send_flash_message({
-                        'message': 'Jenkins job %s:%s succeeded' % (
-                            job_name,
-                            build_no,
-                        ),
-                        'blink': [(0, 255, 0), (0, 0, 0)],
-                        'timeout': 20,
-                    })
+                    send_flash_message(
+                        settings.device_url,
+                        {
+                            'message': 'Jenkins job %s:%s succeeded' % (
+                                job_name,
+                                build_no,
+                            ),
+                            'blink': [(0, 255, 0), (0, 0, 0)],
+                            'timeout': 20,
+                        }
+                    )
                     logger.warn(
                         'Job %s succeeded',
                         formal_build_url,
                     )
                 else:
-                    send_flash_message({
-                        'message': 'Jenkins job %s:%s failed (%s)' % (
-                            job_name,
-                            build_no,
-                            build.get_status()
-                        ),
-                        'blink': [(255, 0, 0), (0, 0, 0)],
-                        'timeout': 20,
-                    })
+                    send_flash_message(
+                        settings.device_url,
+                        {
+                            'message': 'Jenkins job %s:%s failed (%s)' % (
+                                job_name,
+                                build_no,
+                                build.get_status()
+                            ),
+                            'blink': [(255, 0, 0), (0, 0, 0)],
+                            'timeout': 20,
+                        }
+                    )
                     logger.warn(
                         'Job %s failed',
                         formal_build_url,
