@@ -42,6 +42,7 @@ def get_command(name):
 @command('Watch a jenkins job at a provided URL', aliases=['wjj', 'jenkins'])
 def watch_jenkins_job(args, settings, **kwargs):
     from jenkinsapi.jenkins import Jenkins
+    from jenkinsapi.jenkins import JenkinsBase
     from jenkinsapi.build import Build
     from jenkinsapi.utils.requester import Requester
     try:
@@ -62,6 +63,13 @@ def watch_jenkins_job(args, settings, **kwargs):
         default=10,
         type=int,
         help='Amount of time to sleep',
+    )
+    parser.add_arguments(
+        '--retries',
+        dest='retries',
+        default=25,
+        type=int,
+        help='Number of times to re-poll Jenkins'
     )
     options = parser.parse_args(args)
 
@@ -115,6 +123,7 @@ def watch_jenkins_job(args, settings, **kwargs):
             requester=NoVerifyRequester()
         )
         job = jenkins[job_name]
+        job.RETRY_ATTEMPTS = options.retries
         build = Build(formal_build_url, build_no, job)
 
         while True:
