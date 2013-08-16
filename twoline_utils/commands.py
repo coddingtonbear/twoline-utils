@@ -166,7 +166,7 @@ def watch_jenkins_job(args, settings, **kwargs):
         type=int,
         help='Amount of time to sleep',
     )
-    parser.add_arguments(
+    parser.add_argument(
         '--retries',
         dest='retries',
         default=25,
