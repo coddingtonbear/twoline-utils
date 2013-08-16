@@ -60,7 +60,7 @@ def watch_jenkins_job(args, settings, **kwargs):
     parser.add_argument(
         '--sleep-interval',
         dest='sleep_interval',
-        default=10,
+        default=30,
         type=int,
         help='Amount of time to sleep',
     )
