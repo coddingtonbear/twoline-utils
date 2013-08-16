@@ -1,4 +1,5 @@
 import argparse
+import datetime
 import json
 import logging
 import os
@@ -7,7 +8,7 @@ import requests
 import sys
 import time
 
-from twoline_utils.argtypes import color_tuple
+from twoline_utils.argtypes import color_tuple, time_string
 from twoline_utils.utils import send_flash_message
 
 
@@ -40,6 +41,57 @@ def command(desc, name=None, aliases=None):
 
 def get_command(name):
     return COMMANDS[name]
+
+
+@command('Flash the screen when it\'s a certain time')
+def alarm(args, settings, **kwargs):
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        'time',
+        type=time_string,
+        nargs=1,
+        help='Amount of time to wait',
+    )
+    parser.add_argument(
+        'message',
+        type=str,
+        nargs='?',
+        default='Alarm Expired',
+        help='Jenkins URL to watch'
+    )
+    parser.add_argument(
+        '--color',
+        dest='colors',
+        action='append',
+        type=color_tuple,
+        default=[]
+    )
+    parser.add_argument(
+        '--timeout',
+        dest='timeout',
+        type=int,
+        default=20,
+        help='How long to display this message on the screen',
+    )
+    options = parser.parse_args(args)
+
+    if not options.colors:
+        options.colors.extend([(255, 0, 0), (0, 0, 0)])
+
+    while True:
+        now = datetime.datetime.now()
+        if now.hour == options.time[0][0] and now.minute == options.time[0][1]:
+            send_flash_message(
+                settings.device_url,
+                {
+                    'message': options.message,
+                    'blink': options.colors,
+                    'timeout': options.timeout,
+                }
+            )
+            break
+
+        time.sleep(1.0)
 
 
 @command('Start a timer and flash the screen when the timer has expired')
@@ -75,7 +127,7 @@ def timer(args, settings, **kwargs):
     options = parser.parse_args(args)
 
     if not options.colors:
-        options.colors.append((255, 0, 0))
+        options.colors.extend([(255, 0, 0), (0, 0, 0)])
 
     time.sleep(options.interval[0])
 
