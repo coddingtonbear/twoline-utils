@@ -14,8 +14,8 @@ with open(
 setup(
     name='twoline-utils',
     version='0.1',
-    url='http://bitbucket.org/latestrevision/twoline-utils/',
-    description='Utils for http://bitbucket.org/latestrevision/twoline/',
+    url='http://github.com/latestrevision/twoline-utils/',
+    description='Utils for http://github.com/latestrevision/twoline/',
     author='Adam Coddington',
     author_email='me@adamcoddington.net',
     classifiers=[
